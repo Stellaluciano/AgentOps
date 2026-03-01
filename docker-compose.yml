@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: agentops
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/agentops
+      REDIS_URL: redis://redis:6379/0
+      AGENTOPS_API_KEY: dev-api-key
+    volumes:
+      - ./data:/app/data
+    ports: ["8000:8000"]
+    depends_on: [postgres, redis]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/agentops
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [postgres, redis, server]
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    environment:
+      AGENTOPS_API_URL: http://server:8000
+      AGENTOPS_API_KEY: dev-api-key
+    ports: ["3000:3000"]
+    depends_on: [server]
+
+volumes:
+  pgdata:
