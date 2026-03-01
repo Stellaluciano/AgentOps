@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentops"
+version = "0.1.0"
+description = "Observability, replay, and evaluation for LLM agent workflows"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.30",
+  "sqlalchemy>=2.0",
+  "psycopg[binary]>=3.1",
+  "pydantic>=2.7",
+  "requests>=2.31",
+  "redis>=5.0",
+  "rq>=1.16",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools]
+packages = ["agentops_sdk", "agentops_sdk.exporters", "agentops_sdk.providers", "server", "server.api", "server.db", "server.services", "server.auth", "worker", "worker.jobs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
